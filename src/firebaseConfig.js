@@ -28,4 +28,4 @@ const auth = getAuth(app);
 //   app = getApps()[0];
 // }
 
-export { auth };
+export { auth, app };
