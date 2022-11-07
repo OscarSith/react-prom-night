@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { auth } from "./firebaseConfig";
+import { auth } from "../firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-// import Cargando from '../components/Cargando'
 
 export const Auth = React.createContext();
 
@@ -25,7 +24,6 @@ export const AuthContext = ({ children }) => {
   };
 
   if (!showChild) {
-    // return <Cargando/>;
     return <div>Cargando...</div>;
   } else {
     return (

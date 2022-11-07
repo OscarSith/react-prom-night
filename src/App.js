@@ -7,9 +7,11 @@ import {
   useLocation,
   Outlet,
 } from "react-router-dom";
-import { AuthContext, Auth } from "./AuthContext";
+import { AuthContext, Auth } from "./Store/AuthContext";
 import Login from "./Login/Login";
 import { Home } from "./Home/Home";
+import { User } from "./Users/User";
+import { Places } from "./Places/Places";
 
 import "./App.css";
 
@@ -18,9 +20,11 @@ function App() {
     <AuthContext>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          <Route path="login" element={<Login />} />
           <Route element={<RequireAuth />}>
             <Route path="/" element={<Home />} />
+            <Route path="/alumnos" element={<User />} />
+            <Route path="/lugares" element={<Places />} />
           </Route>
         </Routes>
       </BrowserRouter>
@@ -28,7 +32,7 @@ function App() {
   );
 }
 
-function RequireAuth({ children }) {
+function RequireAuth() {
   let { usuario } = useContext(Auth);
   let location = useLocation();
 

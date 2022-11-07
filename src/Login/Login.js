@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { auth } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { Auth } from "../AuthContext";
+import { Auth } from "../Store/AuthContext";
 
 const Login = () => {
   const { usuario } = useContext(Auth);
