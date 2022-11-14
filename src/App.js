@@ -16,9 +16,10 @@ import { Places } from "./Places/Places";
 import "./App.css";
 
 function App() {
+  // prom-night-admin/
   return (
     <AuthContext>
-      <BrowserRouter>
+      <BrowserRouter basename="/">
         <Routes>
           <Route path="login" element={<Login />} />
           <Route element={<RequireAuth />}>

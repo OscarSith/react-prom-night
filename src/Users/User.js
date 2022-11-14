@@ -20,23 +20,25 @@ import { TableOverlay } from "../Home/HomeStyles";
 const User = () => {
   const db = getFirestore(app);
   const fileExcel = useRef(null);
+  const shouldLoad = useRef(true);
 
   const [alumnos, setAlumnos] = useState([]);
   const [promos, setPromos] = useState([]);
-  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [promoId, setPromoId] = useState(null);
 
   useEffect(() => {
-    if (mounted) {
+    if (shouldLoad.current) {
       const q = query(collection(db, "promos"), orderBy("order", "desc"));
       getDocs(q).then((data) => {
         setPromos(data.docs);
       });
-    } else {
-      setMounted(true);
     }
-  }, [mounted]);
+
+    return () => {
+      shouldLoad.current = false;
+    };
+  }, []);
 
   const handlerChangePromo = (event) => {
     setLoading(true);
@@ -56,6 +58,11 @@ const User = () => {
   };
 
   const handlerInputfile = () => {
+    if (!promoId) {
+      alert("Seleccione una promoción primero");
+      return;
+    }
+
     const file = fileExcel.current.files[0];
     if (file) {
       setLoading(true);
@@ -64,9 +71,9 @@ const User = () => {
           for (let i = 0; i < rows.length; i++) {
             if (i > 0) {
               const newDoc = {
-                nombres: rows[i][0],
-                apellidos: rows[i][1],
-                correo: rows[i][2],
+                nombres: rows[i][1],
+                apellidos: rows[i][2],
+                llevaInvitado: rows[i][3],
                 idPromo: promoId,
               };
               await addDoc(collection(db, "promo_alumnos"), newDoc);
@@ -157,11 +164,11 @@ const User = () => {
               <thead>
                 <tr className="table-dark">
                   <th>Nombre completo</th>
+                  <th>Acompañante</th>
                   <th>Celular</th>
                   <th>Correo</th>
                   <th>Fecha Inicio</th>
                   <th>Género</th>
-                  <th>Fecha</th>
                   <th></th>
                 </tr>
               </thead>
@@ -173,6 +180,7 @@ const User = () => {
                       <td>
                         {data.nombres} {data.apellidos}
                       </td>
+                      <td>{data.llevaInvitado}</td>
                       <td>{data.celular}</td>
                       <td>{data.correo}</td>
                       <td>{data.sexo}</td>

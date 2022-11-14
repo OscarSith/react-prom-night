@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   collection,
   deleteDoc,
@@ -19,6 +19,7 @@ import { TableOverlay } from "./HomeStyles";
 
 const Home = () => {
   const db = getFirestore(app);
+  const shouldLoad = useRef(true);
 
   // use states
   const [promociones, setPromociones] = useState([]);
@@ -28,7 +29,8 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (updateListPromos > 0) {
+    if (shouldLoad.current || updateListPromos) {
+      shouldLoad.current = false;
       setLoading(true);
       const q = query(collection(db, "promos"), orderBy("order", "desc"));
       getDocs(q)
@@ -36,8 +38,6 @@ const Home = () => {
           setPromociones(data.docs);
         })
         .finally(finallyFn);
-    } else {
-      setUpdateListPromos(1);
     }
   }, [updateListPromos]);
 

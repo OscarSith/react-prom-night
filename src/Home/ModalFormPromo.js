@@ -111,7 +111,6 @@ const ModalFormPromo = ({
         .finally(finallyFn);
     } else {
       data["order"] = ++cantidadPromos;
-      console.log(cantidadPromos);
 
       addDoc(collection(db, DOC_NAME), data)
         .then(async (promoRef) => {
@@ -126,6 +125,7 @@ const ModalFormPromo = ({
     modalClose();
     setUpdateListPromos((prevState) => ++prevState);
   };
+
   const finallyFn = (_) => {
     setLoading(false);
     formModal.current.reset();
