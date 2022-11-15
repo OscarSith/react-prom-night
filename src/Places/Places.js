@@ -4,25 +4,24 @@ import {
   doc,
   getDoc,
   getDocs,
-  getFirestore,
   orderBy,
   query,
 } from "firebase/firestore";
-import { app } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
 
 import { MainLayout } from "../Components/MainLayout";
 import { ModalFormPlace } from "./ModalFormPlace";
+import { AccordionPlace } from "./AccordionPlace";
 
 const Places = () => {
-  const db = getFirestore(app);
   const shouldLoad = useRef(true);
 
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [promoId, setPromoId] = useState(null);
   const [lugar, setLugar] = useState({});
-  const [show, setShow] = useState(null);
   const [ejecutar, setEjecutar] = useState(0);
+  const [updateListLugares, setUpdateListLugares] = useState(0);
 
   useEffect(() => {
     if (shouldLoad.current) {
@@ -32,20 +31,37 @@ const Places = () => {
       });
     }
 
+    if (updateListLugares) {
+      const input = document.querySelector("#select-promos");
+      const ev = new Event("change", { bubbles: true });
+      input.dispatchEvent(ev);
+    }
+
     return () => {
       shouldLoad.current = false;
     };
-  }, []);
+  }, [updateListLugares]);
 
   const handlerChangePromo = (event) => {
-    setLoading(true);
     const currentIdPromo = event.currentTarget.value;
+    if (currentIdPromo === "0") {
+      setPromoId(null);
+      setLugar({});
+      return;
+    }
+
+    setLoading(true);
     setPromoId(currentIdPromo);
 
+    // Limpio la variable de los lugares,
+    // Porque estableciendolo en {} se vuelve a renderizar el componente
+    // y asi el boton de editar se deshabilita por que no tiene lugares
+    setLugar({});
     const docRef = doc(db, "promo_lugares", currentIdPromo);
     getDoc(docRef)
       .then((docSnap) => {
-        setLugar(docSnap.data());
+        const data = docSnap.data();
+        setLugar(data === undefined ? {} : data);
       })
       .finally(finallyFn);
   };
@@ -60,61 +76,18 @@ const Places = () => {
       const order = parseInt(item.split("_")[1]);
       items.push({
         order,
-        item: (
-          <div className="accordion-item" key={order}>
-            <h2 className="accordion-header" id={"heading" + order}>
-              <button
-                className={
-                  "accordion-button " + (order === show ? "" : "collapsed")
-                }
-                type="button"
-                aria-expanded={order === show ? "true" : "false"}
-                aria-controls={"collapse" + order}
-                onClick={handlerOpenData}
-                data-order={order}
-              >
-                <strong>{item}</strong> - {lugar[item].total} mesas
-              </button>
-            </h2>
-            <div
-              id={"collapse" + order}
-              className={
-                "accordion-collapse collapse " + (order === show ? "show" : "")
-              }
-              aria-labelledby={"heading" + order}
-            >
-              <div className="accordion-body">
-                <div className="row">
-                  {lugar[item].sillas.map((item, i) => {
-                    return (
-                      <div className="col-3" key={i}>
-                        <strong>Silla {item.silla}</strong>
-                        <p>{item.nombre}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        ),
+        item: <AccordionPlace order={order} item={item} lugar={lugar} />,
       });
     }
 
     return items.sort((a, b) => a.order - b.order);
   };
 
-  const handlerOpenData = (event) => {
-    const order = parseInt(event.currentTarget.getAttribute("data-order"));
-    const isCollapsed = event.currentTarget.classList.contains("collapsed");
-    if (!isCollapsed) {
-      setShow(null);
-    } else {
-      setShow(order);
-    }
+  const modalOpen = () => {
+    setEjecutar((previousData) => ++previousData);
   };
 
-  const modalOpen = () => {
+  const modalOpenEdit = () => {
     setEjecutar((previousData) => ++previousData);
   };
 
@@ -124,12 +97,12 @@ const Places = () => {
       <div className="row mb-3">
         <div className="col-4 d-flex">
           <select
-            className="form-select"
+            className="form-select me-3"
             disabled={!promos.length}
             onChange={handlerChangePromo}
             id="select-promos"
           >
-            <option>
+            <option value="0">
               {!promos.length ? "Cargando lista..." : "Seleccione"}
             </option>
             {promos.map((promo) => {
@@ -140,23 +113,54 @@ const Places = () => {
               );
             })}
           </select>
+          {promoId ? (
+            <button
+              type="button"
+              className={
+                "btn btn-info " +
+                (lugar.hasOwnProperty("mesa_1") ? "d-none" : "")
+              }
+              onClick={modalOpen}
+            >
+              Nuevo
+            </button>
+          ) : (
+            ""
+          )}
           <button
             type="button"
-            className="btn btn-secondary me-3 d-none"
-            onClick={modalOpen}
+            className={
+              "btn btn-success " +
+              (!lugar.hasOwnProperty("mesa_1") ? "d-none" : "")
+            }
+            onClick={modalOpenEdit}
           >
-            Nuevo
+            Editar
           </button>
         </div>
       </div>
       <div className="row">
         <div className="accordion">
-          {printPlaces().map((item) => {
-            return item.item;
-          })}
+          {loading ? (
+            <p>Cargando...</p>
+          ) : (
+            printPlaces().map((item) => {
+              return item.item;
+            })
+          )}
         </div>
       </div>
-      <ModalFormPlace ejecutar={ejecutar} />
+      {!ejecutar ? (
+        ""
+      ) : (
+        <ModalFormPlace
+          ejecutar={ejecutar}
+          setEjecutar={setEjecutar}
+          promoId={promoId}
+          setUpdateListLugares={setUpdateListLugares}
+          lugar={lugar}
+        />
+      )}
     </MainLayout>
   );
 };

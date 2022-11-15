@@ -3,11 +3,10 @@ import {
   addDoc,
   collection,
   doc,
-  getFirestore,
   Timestamp,
   updateDoc,
 } from "firebase/firestore";
-import { app } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
 
 const DOC_NAME = "promos";
 
@@ -19,7 +18,6 @@ const ModalFormPromo = ({
   setDataToUpdate,
 }) => {
   const formModal = useRef(null);
-  const db = getFirestore(app);
 
   // useStates
   const [musica, setMusica] = useState(false);

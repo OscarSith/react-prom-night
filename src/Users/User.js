@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 import readXlsxFile from "read-excel-file";
-import { app } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   addDoc,
@@ -9,7 +9,6 @@ import {
   deleteDoc,
   doc,
   getDocs,
-  getFirestore,
   orderBy,
   query,
   where,
@@ -18,7 +17,6 @@ import { MainLayout } from "../Components/MainLayout";
 import { TableOverlay } from "../Home/HomeStyles";
 
 const User = () => {
-  const db = getFirestore(app);
   const fileExcel = useRef(null);
   const shouldLoad = useRef(true);
 
