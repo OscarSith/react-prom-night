@@ -103,7 +103,9 @@ const Places = () => {
             id="select-promos"
           >
             <option value="0">
-              {!promos.length ? "Cargando lista..." : "Seleccione"}
+              {!promos.length
+                ? "Cargando lista..."
+                : "Seleccione una promoción"}
             </option>
             {promos.map((promo) => {
               return (

@@ -8,6 +8,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -15,6 +16,7 @@ import {
 } from "firebase/firestore";
 import { MainLayout } from "../Components/MainLayout";
 import { TableOverlay } from "../Home/HomeStyles";
+import { ModalUser } from "./Modal/ModalUser";
 
 const User = () => {
   const fileExcel = useRef(null);
@@ -24,6 +26,8 @@ const User = () => {
   const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [promoId, setPromoId] = useState(null);
+  const [ejecutar, setEjecutar] = useState(0);
+  const [alumno, setAlumno] = useState(null);
 
   useEffect(() => {
     if (shouldLoad.current) {
@@ -99,6 +103,17 @@ const User = () => {
     }
   };
 
+  const handlerEdit = async (event) => {
+    const currentElement = event.currentTarget;
+    const id = currentElement.getAttribute("id");
+    currentElement.disabled = true;
+    const alumno = await getDoc(doc(db, "promo_alumnos", id));
+
+    setAlumno(alumno);
+    setEjecutar(1);
+    currentElement.disabled = false;
+  };
+
   const updateListAlumnos = () => {
     const input = document.querySelector("#select-promos");
     const ev = new Event("change", { bubbles: true });
@@ -121,7 +136,9 @@ const User = () => {
             id="select-promos"
           >
             <option>
-              {!promos.length ? "Cargando lista..." : "Seleccione"}
+              {!promos.length
+                ? "Cargando lista..."
+                : "Seleccione una promoción"}
             </option>
             {promos.map((promo) => {
               return (
@@ -165,8 +182,8 @@ const User = () => {
                   <th>Acompañante</th>
                   <th>Celular</th>
                   <th>Correo</th>
-                  <th>Fecha Inicio</th>
                   <th>Género</th>
+                  <th>Fecha Inicio</th>
                   <th></th>
                 </tr>
               </thead>
@@ -188,21 +205,24 @@ const User = () => {
                           : ""}
                       </td>
                       <td>
-                        <button
-                          type="button"
-                          className="btn btn-success btn-sm me-2 d-none"
-                          data-id={alumno.id}
-                        >
-                          <FontAwesomeIcon icon={solid("edit")} />
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-danger btn-sm"
-                          data-id={alumno.id}
-                          onClick={handlerDelete}
-                        >
-                          <FontAwesomeIcon icon={solid("trash")} />
-                        </button>
+                        <div className="d-flex">
+                          <button
+                            type="button"
+                            className="btn btn-success btn-sm me-2"
+                            id={alumno.id}
+                            onClick={handlerEdit}
+                          >
+                            <FontAwesomeIcon icon={solid("edit")} />
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-danger btn-sm"
+                            data-id={alumno.id}
+                            onClick={handlerDelete}
+                          >
+                            <FontAwesomeIcon icon={solid("trash")} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -212,6 +232,16 @@ const User = () => {
           </div>
         </div>
       </div>
+      {ejecutar ? (
+        <ModalUser
+          ejecutar={ejecutar}
+          setEjecutar={setEjecutar}
+          user={alumno}
+          updateListAlumnos={updateListAlumnos}
+        />
+      ) : (
+        ""
+      )}
     </MainLayout>
   );
 };
