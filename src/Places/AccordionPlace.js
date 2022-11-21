@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const AccordionPlace = ({ order, item, lugar }) => {
+const AccordionPlace = ({ order, item, lugar, deleteChair, loadingChair }) => {
   const [show, setShow] = useState(null);
 
   const handlerOpenData = (event) => {
@@ -14,7 +14,7 @@ const AccordionPlace = ({ order, item, lugar }) => {
   };
 
   return (
-    <div className="accordion-item" key={order}>
+    <div className="accordion-item">
       <h2 className="accordion-header" id={"heading" + order}>
         <button
           className={"accordion-button " + (order === show ? "" : "collapsed")}
@@ -36,11 +36,21 @@ const AccordionPlace = ({ order, item, lugar }) => {
       >
         <div className="accordion-body">
           <div className="row">
-            {lugar[item].sillas.map((item, i) => {
+            {lugar[item].sillas.map((subItem, i) => {
               return (
                 <div className="col-3" key={i}>
-                  <strong>Silla {item.silla}</strong>
-                  <p>{item.nombre}</p>
+                  <strong>Silla {subItem.silla}</strong>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-link text-danger pt-0"
+                    onClick={deleteChair}
+                    silla={i}
+                    mesa={item}
+                    disabled={loadingChair}
+                  >
+                    Eliminar
+                  </button>
+                  <p className="small">{subItem.nombre}</p>
                 </div>
               );
             })}
