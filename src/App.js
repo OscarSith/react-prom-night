@@ -14,6 +14,7 @@ import { User } from "./Users/User";
 import { Places } from "./Places/Places";
 
 import "./App.css";
+import { Voto } from "./Votos/Voto";
 
 function App() {
   // prom-night-admin/
@@ -26,6 +27,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/alumnos" element={<User />} />
             <Route path="/lugares" element={<Places />} />
+            <Route path="/votos" element={<Voto />} />
           </Route>
         </Routes>
       </BrowserRouter>

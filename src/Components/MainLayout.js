@@ -56,6 +56,11 @@ const MainLayout = ({ children }) => {
                     Lugares
                   </NavLink>
                 </li>
+                <li className="nav-item">
+                  <NavLink className={fnIsActive} to="/votos">
+                    Los más votados
+                  </NavLink>
+                </li>
               </ul>
               <button onClick={logout} className="btn btn-secondary btn-sm">
                 Cerrar sesión
