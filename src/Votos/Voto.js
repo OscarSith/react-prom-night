@@ -57,7 +57,7 @@ const Voto = () => {
     <MainLayout>
       <h2 className="text-center">Los 10 mas votados</h2>
       <div className="row mb-3">
-        <div className="col-3">
+        <div className="col col-lg-3">
           <select
             className="form-select"
             disabled={!promociones.length}
@@ -81,11 +81,14 @@ const Voto = () => {
       </div>
       <hr />
       <div className="row mb-3 justify-content-center">
-        <div className="col-6">
+        <div className="col col-lg-6">
           <ul className="list-group">
-            {alumnos.map((alumno) => {
+            {alumnos.map((alumno, i) => {
               return (
-                <li className="list-group-item d-flex justify-content-between align-items-center">
+                <li
+                  className="list-group-item d-flex justify-content-between align-items-center"
+                  key={i}
+                >
                   {alumno.nombres_apellidos}
                   <span className="badge bg-primary rounded-pill">
                     {alumno.votos}

@@ -38,7 +38,7 @@ const AccordionPlace = ({ order, item, lugar, deleteChair, loadingChair }) => {
           <div className="row">
             {lugar[item].sillas.map((subItem, i) => {
               return (
-                <div className="col-3" key={i}>
+                <div className="col-6 col-lg-3" key={i}>
                   <strong>Silla {subItem.silla}</strong>
                   <button
                     type="button"

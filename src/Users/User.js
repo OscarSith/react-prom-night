@@ -128,7 +128,7 @@ const User = () => {
     <MainLayout>
       <h2 className="text-center">Lista de alumnos</h2>
       <div className="row mb-3">
-        <div className="col-3">
+        <div className="col-12 col-lg-3 mb-3 mb-lg-0">
           <select
             className="form-select"
             disabled={!promos.length}
@@ -149,7 +149,7 @@ const User = () => {
             })}
           </select>
         </div>
-        <div className="col-5 d-flex">
+        <div className="col-12 col-lg-5 d-flex">
           <input
             type="file"
             className="form-control me-2"
@@ -168,6 +168,9 @@ const User = () => {
       </div>
       <div className="row">
         <div className="col">
+          <div className="mb-3">
+            <strong>Total de alumnos: {alumnos.length}</strong>
+          </div>
           <div className="table-responsive position-relative">
             <TableOverlay
               className={
@@ -183,7 +186,7 @@ const User = () => {
                   <th>Celular</th>
                   <th>Correo</th>
                   <th>Género</th>
-                  <th>Fecha Inicio</th>
+                  <th>Registro</th>
                   <th></th>
                 </tr>
               </thead>

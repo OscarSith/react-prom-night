@@ -1,9 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Auth } from "../Store/AuthContext";
 
 const MainLayout = ({ children }) => {
   const { signout } = useContext(Auth);
+  const [show, setShow] = useState(false);
   const navigate = useNavigate();
   const activeClassName = "active";
 
@@ -13,6 +14,10 @@ const MainLayout = ({ children }) => {
 
   const fnIsActive = ({ isActive }) => {
     return "nav-link " + (isActive ? activeClassName : "");
+  };
+
+  const openNavMenu = (e) => {
+    setShow((prevState) => !prevState);
   };
 
   return (
@@ -26,15 +31,17 @@ const MainLayout = ({ children }) => {
             <button
               className="navbar-toggler"
               type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarNav"
               aria-controls="navbarNav"
               aria-expanded="false"
               aria-label="Toggle navigation"
+              onClick={openNavMenu}
             >
               <span className="navbar-toggler-icon"></span>
             </button>
-            <div className="collapse navbar-collapse" id="navbarNav">
+            <div
+              className={"collapse navbar-collapse " + (show ? "show" : "")}
+              id="navbarNav"
+            >
               <ul className="navbar-nav me-auto">
                 <li className="nav-item">
                   <NavLink
@@ -61,8 +68,17 @@ const MainLayout = ({ children }) => {
                     Los más votados
                   </NavLink>
                 </li>
+                <li className="nav-item">
+                  <NavLink className={fnIsActive} to="/musicas">
+                    Musicas
+                  </NavLink>
+                </li>
               </ul>
-              <button onClick={logout} className="btn btn-secondary btn-sm">
+              <hr className="d-lg-none mt-1 mb-3" />
+              <button
+                onClick={logout}
+                className="btn btn-secondary btn-sm mt-3 mt-lg-0"
+              >
                 Cerrar sesión
               </button>
             </div>

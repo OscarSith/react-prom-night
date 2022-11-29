@@ -15,9 +15,10 @@ import { Places } from "./Places/Places";
 
 import "./App.css";
 import { Voto } from "./Votos/Voto";
+import { Musica } from "./Musica/Musica";
 
 function App() {
-  // prom-night-admin/
+  // prom-night-admin2/
   return (
     <AuthContext>
       <BrowserRouter basename="/">
@@ -28,6 +29,7 @@ function App() {
             <Route path="/alumnos" element={<User />} />
             <Route path="/lugares" element={<Places />} />
             <Route path="/votos" element={<Voto />} />
+            <Route path="/musicas" element={<Musica />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -183,7 +183,7 @@ const Places = () => {
     <MainLayout>
       <h1>Listado de Lugares</h1>
       <div className="row">
-        <div className="col-4 d-flex">
+        <div className="col col-lg-4 d-flex">
           <select
             className="form-select me-3"
             disabled={!promos.length}
@@ -236,7 +236,7 @@ const Places = () => {
           <hr />
           <h4>Agregar una reserva</h4>
           <form className="row" ref={formAddChair} onSubmit={submitAddTable}>
-            <div className="col-2">
+            <div className="col-12 col-lg-2 mb-2 mb-lg-0">
               <select
                 className="form-select form-select-sm"
                 name="mesa"
@@ -250,7 +250,7 @@ const Places = () => {
                 ))}
               </select>
             </div>
-            <div className="col-4">
+            <div className="col-8 col-lg-4">
               <input
                 type="text"
                 className="form-control form-control-sm"
@@ -259,7 +259,7 @@ const Places = () => {
                 disabled={loadingAddChair}
               />
             </div>
-            <div className="col-2">
+            <div className="col-4 col-lg-2">
               <button
                 type="submit"
                 className="btn btn-sm btn-info"
