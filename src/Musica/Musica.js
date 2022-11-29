@@ -1,27 +1,14 @@
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
-import React, { useEffect, useRef, useState } from "react";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import React, { useContext, useState } from "react";
 import { MainLayout } from "../Components/MainLayout";
 import { db } from "../firebaseConfig";
+import { Context } from "../Store/promos-context";
 
 const Musica = () => {
-  const shouldLoad = useRef(true);
+  const { promociones } = useContext(Context);
 
-  const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [musicas, setMusicas] = useState([]);
-
-  useEffect(() => {
-    if (shouldLoad.current) {
-      const q = query(collection(db, "promos"), orderBy("order", "desc"));
-      getDocs(q).then((data) => {
-        setPromos(data.docs);
-      });
-    }
-
-    return () => {
-      shouldLoad.current = false;
-    };
-  }, []);
 
   const handlerChangePromo = (event) => {
     setLoading(true);
@@ -62,16 +49,16 @@ const Musica = () => {
         <div className="col col-lg-3">
           <select
             className="form-select"
-            disabled={!promos.length}
+            disabled={!promociones.length}
             onChange={handlerChangePromo}
             id="select-promos"
           >
             <option>
-              {!promos.length
+              {!promociones.length
                 ? "Cargando lista..."
                 : "Seleccione una promoción"}
             </option>
-            {promos.map((promo) => {
+            {promociones.map((promo) => {
               return (
                 <option value={promo.id} key={promo.id}>
                   {promo.get("nombre")}

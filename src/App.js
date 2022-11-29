@@ -16,23 +16,26 @@ import { Places } from "./Places/Places";
 import "./App.css";
 import { Voto } from "./Votos/Voto";
 import { Musica } from "./Musica/Musica";
+import { ProviderPromociones } from "./Store/promos-context";
 
 function App() {
   // prom-night-admin2/
   return (
     <AuthContext>
-      <BrowserRouter basename="/">
-        <Routes>
-          <Route path="login" element={<Login />} />
-          <Route element={<RequireAuth />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/alumnos" element={<User />} />
-            <Route path="/lugares" element={<Places />} />
-            <Route path="/votos" element={<Voto />} />
-            <Route path="/musicas" element={<Musica />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ProviderPromociones>
+        <BrowserRouter basename="/">
+          <Routes>
+            <Route path="login" element={<Login />} />
+            <Route element={<RequireAuth />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/alumnos" element={<User />} />
+              <Route path="/lugares" element={<Places />} />
+              <Route path="/votos" element={<Voto />} />
+              <Route path="/musicas" element={<Musica />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ProviderPromociones>
     </AuthContext>
   );
 }

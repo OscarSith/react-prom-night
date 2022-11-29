@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 import readXlsxFile from "read-excel-file";
 import { db } from "../firebaseConfig";
@@ -17,30 +17,17 @@ import {
 import { MainLayout } from "../Components/MainLayout";
 import { TableOverlay } from "../Home/HomeStyles";
 import { ModalUser } from "./Modal/ModalUser";
+import { Context } from "../Store/promos-context";
 
 const User = () => {
+  const { promociones } = useContext(Context);
   const fileExcel = useRef(null);
-  const shouldLoad = useRef(true);
 
   const [alumnos, setAlumnos] = useState([]);
-  const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [promoId, setPromoId] = useState(null);
   const [ejecutar, setEjecutar] = useState(0);
   const [alumno, setAlumno] = useState(null);
-
-  useEffect(() => {
-    if (shouldLoad.current) {
-      const q = query(collection(db, "promos"), orderBy("order", "desc"));
-      getDocs(q).then((data) => {
-        setPromos(data.docs);
-      });
-    }
-
-    return () => {
-      shouldLoad.current = false;
-    };
-  }, []);
 
   const handlerChangePromo = (event) => {
     setLoading(true);
@@ -131,16 +118,16 @@ const User = () => {
         <div className="col-12 col-lg-3 mb-3 mb-lg-0">
           <select
             className="form-select"
-            disabled={!promos.length}
+            disabled={!promociones.length}
             onChange={handlerChangePromo}
             id="select-promos"
           >
             <option>
-              {!promos.length
+              {!promociones.length
                 ? "Cargando lista..."
                 : "Seleccione una promoción"}
             </option>
-            {promos.map((promo) => {
+            {promociones.map((promo) => {
               return (
                 <option value={promo.id} key={promo.id}>
                   {promo.get("nombre")}

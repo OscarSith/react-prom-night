@@ -1,43 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  orderBy,
-  query,
-} from "firebase/firestore";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 import { ModalFormPromo } from "./ModalFormPromo";
 import { MainLayout } from "../Components/MainLayout";
+import { Context } from "../Store/promos-context";
 
 import { TableOverlay } from "./HomeStyles";
 
 const Home = () => {
   const shouldLoad = useRef(true);
+  const { promociones, obtenerPromociones } = useContext(Context);
 
   // use states
-  const [promociones, setPromociones] = useState([]);
   const [updateListPromos, setUpdateListPromos] = useState(0);
   const [ejecutar, setEjecutar] = useState(0);
   const [dataToUpdate, setDataToUpdate] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (shouldLoad.current || updateListPromos) {
+    if (updateListPromos) {
       shouldLoad.current = false;
-      setLoading(true);
-      const q = query(collection(db, "promos"), orderBy("order", "desc"));
-      getDocs(q)
-        .then((data) => {
-          setPromociones(data.docs);
-        })
-        .finally(finallyFn);
+      obtenerPromociones();
     }
-  }, [updateListPromos]);
+  }, [updateListPromos, obtenerPromociones]);
 
   const modalOpen = () => {
     setEjecutar((previousData) => ++previousData);
@@ -83,7 +71,7 @@ const Home = () => {
               }
               style={{ "--bs-bg-opacity": 0.6 }}
             ></TableOverlay>
-            <table className="table table-hover">
+            <table className="table table-hover small">
               <thead>
                 <tr className="table-dark">
                   <th>Nombre</th>
@@ -114,22 +102,24 @@ const Home = () => {
                             : ""}
                         </td>
                         <td>
-                          <button
-                            type="button"
-                            className="btn btn-success btn-sm me-2"
-                            data-id={promo.id}
-                            onClick={handlerEdit}
-                          >
-                            <FontAwesomeIcon icon={solid("edit")} />
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm"
-                            data-id={promo.id}
-                            onClick={handlerDelete}
-                          >
-                            <FontAwesomeIcon icon={solid("trash")} />
-                          </button>
+                          <div className="d-flex">
+                            <button
+                              type="button"
+                              className="btn btn-success btn-sm me-2"
+                              data-id={promo.id}
+                              onClick={handlerEdit}
+                            >
+                              <FontAwesomeIcon icon={solid("edit")} />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              data-id={promo.id}
+                              onClick={handlerDelete}
+                            >
+                              <FontAwesomeIcon icon={solid("trash")} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

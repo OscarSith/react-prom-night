@@ -1,24 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  orderBy,
-  query,
-  updateDoc,
-} from "firebase/firestore";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 import { MainLayout } from "../Components/MainLayout";
 import { ModalFormPlace } from "./ModalFormPlace";
 import { AccordionPlace } from "./AccordionPlace";
+import { Context } from "../Store/promos-context";
 
 const Places = () => {
+  const { promociones } = useContext(Context);
   const shouldLoad = useRef(true);
   const formAddChair = useRef(null);
 
-  const [promos, setPromos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingChair, setLoadingChair] = useState(false);
   const [loadingAddChair, setLoadingAddChair] = useState(false);
@@ -28,13 +21,6 @@ const Places = () => {
   const [updateListLugares, setUpdateListLugares] = useState(0);
 
   useEffect(() => {
-    if (shouldLoad.current) {
-      const q = query(collection(db, "promos"), orderBy("order", "desc"));
-      getDocs(q).then((data) => {
-        setPromos(data.docs);
-      });
-    }
-
     if (updateListLugares) {
       const input = document.querySelector("#select-promos");
       const ev = new Event("change", { bubbles: true });
@@ -186,16 +172,16 @@ const Places = () => {
         <div className="col col-lg-4 d-flex">
           <select
             className="form-select me-3"
-            disabled={!promos.length}
+            disabled={!promociones.length}
             onChange={handlerChangePromo}
             id="select-promos"
           >
             <option value="0">
-              {!promos.length
+              {!promociones.length
                 ? "Cargando lista..."
                 : "Seleccione una promoción"}
             </option>
-            {promos.map((promo) => {
+            {promociones.map((promo) => {
               return (
                 <option value={promo.id} key={promo.id}>
                   {promo.get("nombre")}
