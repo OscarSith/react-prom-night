@@ -121,6 +121,29 @@ const ModalUser = ({ user, ejecutar, setEjecutar, updateListAlumnos }) => {
                   />
                   <label htmlFor="llevaInvitado">Nombre del invitado</label>
                 </div>
+                <div className="row">
+                  <div className="col col-lg-6">
+                    <div className="form-floating mb-3">
+                      <select className="form-select" id="genero" name="sexo">
+                        <option value="Hombre">Hombre</option>
+                        <option value="Mujer">Mujer</option>
+                      </select>
+                      <label htmlFor="genero">Género</label>
+                    </div>
+                  </div>
+                  <div className="col col-lg-6">
+                    <div className="form-floating mb-3">
+                      <input
+                        type="tel"
+                        className="form-control"
+                        id="celular"
+                        placeholder="Número de celular"
+                        name="celular"
+                      />
+                      <label htmlFor="celular">Número de celular</label>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="modal-footer">
                 <button

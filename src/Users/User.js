@@ -1,23 +1,27 @@
 import React, { useContext, useRef, useState } from "react";
-import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { Context } from "../Store/promos-context";
 import readXlsxFile from "read-excel-file";
 import { db } from "../firebaseConfig";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   addDoc,
+  arrayRemove,
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
   orderBy,
   query,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { MainLayout } from "../Components/MainLayout";
 import { TableOverlay } from "../Home/HomeStyles";
 import { ModalUser } from "./Modal/ModalUser";
-import { Context } from "../Store/promos-context";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { solid } from "@fortawesome/fontawesome-svg-core/import.macro";
+
+import { StikyPanel } from "./UserStyles";
 
 const User = () => {
   const { promociones } = useContext(Context);
@@ -28,6 +32,7 @@ const User = () => {
   const [promoId, setPromoId] = useState(null);
   const [ejecutar, setEjecutar] = useState(0);
   const [alumno, setAlumno] = useState(null);
+  const [votoLoading, setVotoLoading] = useState(false);
 
   const handlerChangePromo = (event) => {
     setLoading(true);
@@ -93,10 +98,9 @@ const User = () => {
   const handlerEdit = async (event) => {
     const currentElement = event.currentTarget;
     const id = currentElement.getAttribute("id");
-    currentElement.disabled = true;
-    const alumno = await getDoc(doc(db, "promo_alumnos", id));
 
-    setAlumno(alumno);
+    currentElement.disabled = true;
+    setAlumno(alumnos.find((alumno) => alumno.id === id));
     setEjecutar(1);
     currentElement.disabled = false;
   };
@@ -107,57 +111,127 @@ const User = () => {
     input.dispatchEvent(ev);
   };
 
+  const handlerRemoveVote = async (event) => {
+    if (window.confirm("Seguro(a) de eliminar el VOTO de este alumno?")) {
+      // setVotoLoading(true);
+      const id = event.currentTarget.getAttribute("id");
+      const alumnoEncontrado = alumnos.find((alumno) => alumno.id === id);
+      const nombresCompletos = getFullName(alumnoEncontrado.data());
+      let listaAlumnosVotados = [];
+
+      for (let i = 0; i < alumnos.length; i++) {
+        const alumno = alumnos[i].data();
+        if (alumno.votos) {
+          for (let j = 0; j < alumno.votos.length; j++) {
+            if (alumno.votos[j] === nombresCompletos) {
+              listaAlumnosVotados.push(alumno);
+              break;
+            }
+          }
+
+          if (listaAlumnosVotados.length === 2) break;
+        }
+      }
+
+      // return;
+      try {
+        const batch = writeBatch(db);
+
+        const docRef = doc(db, "promo_alumnos", id);
+        batch.update(docRef, {
+          "acciones.mejor_amigo_elegido": false,
+          mejorAmigo: [],
+        });
+
+        batch.update(doc(db, "promo_alumnos", listaAlumnosVotados[0].id), {
+          votos: arrayRemove(nombresCompletos),
+        });
+
+        if (listaAlumnosVotados[1]) {
+          batch.update(doc(db, "promo_alumnos", listaAlumnosVotados[1].id), {
+            votos: arrayRemove(nombresCompletos),
+          });
+        }
+
+        await batch.commit();
+        setVotoLoading(false);
+        updateListAlumnos();
+        window.alert("VOTO eliminado con exito");
+      } catch (e) {
+        setVotoLoading(false);
+        window.alert("Hubo un error al eliminar el voto, intentelo de nuevo");
+        console.log("La transacción falló: ", e);
+      }
+    }
+  };
+
+  const getFullName = (alumno) => {
+    return `${alumno.nombres} ${alumno.apellidos}`;
+  };
+
   const finallyFn = () => {
     setLoading(false);
   };
 
   return (
     <MainLayout>
-      <h2 className="text-center">Lista de alumnos</h2>
-      <div className="row mb-3">
-        <div className="col-12 col-lg-3 mb-3 mb-lg-0">
-          <select
-            className="form-select"
-            disabled={!promociones.length}
-            onChange={handlerChangePromo}
-            id="select-promos"
-          >
-            <option>
-              {!promociones.length
-                ? "Cargando lista..."
-                : "Seleccione una promoción"}
-            </option>
-            {promociones.map((promo) => {
-              return (
-                <option value={promo.id} key={promo.id}>
-                  {promo.get("nombre")}
-                </option>
-              );
-            })}
-          </select>
+      <StikyPanel className="sticky-top">
+        <h2 className="text-center">Lista de alumnos</h2>
+        <div className="row mb-3">
+          <div className="col-12 col-lg-4 mb-3 mb-lg-0 d-flex">
+            <select
+              className="form-select"
+              disabled={!promociones.length}
+              onChange={handlerChangePromo}
+              id="select-promos"
+            >
+              <option>
+                {!promociones.length
+                  ? "Cargando lista..."
+                  : "Seleccione una promoción"}
+              </option>
+              {promociones.map((promo) => {
+                return (
+                  <option value={promo.id} key={promo.id}>
+                    {promo.get("nombre")}
+                  </option>
+                );
+              })}
+            </select>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm float-start ms-3"
+              title="Actualizar"
+              onClick={updateListAlumnos}
+              style={{ padding: "0 14px" }}
+            >
+              <FontAwesomeIcon icon={solid("arrow-rotate-right")} />
+            </button>
+          </div>
+          <div className="col-12 col-lg-5 d-flex">
+            <input
+              type="file"
+              className="form-control me-2"
+              ref={fileExcel}
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handlerInputfile}
+              disabled={loading}
+            >
+              {loading ? "Cargando..." : "Subir"}
+            </button>
+          </div>
+          <div className="col text-end align-self-center">
+            <strong>Total de alumnos: </strong>
+            <span className="badge bg-dark rounded-pill">{alumnos.length}</span>
+          </div>
         </div>
-        <div className="col-12 col-lg-5 d-flex">
-          <input
-            type="file"
-            className="form-control me-2"
-            ref={fileExcel}
-            disabled={loading}
-          />
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={handlerInputfile}
-            disabled={loading}
-          >
-            {loading ? "Cargando..." : "Subir"}
-          </button>
-        </div>
-      </div>
+      </StikyPanel>
       <div className="row">
         <div className="col">
-          <div className="mb-3">
-            <strong>Total de alumnos: {alumnos.length}</strong>
-          </div>
           <div className="table-responsive position-relative">
             <TableOverlay
               className={
@@ -198,7 +272,7 @@ const User = () => {
                         <div className="d-flex">
                           <button
                             type="button"
-                            className="btn btn-success btn-sm me-2"
+                            className="btn btn-success btn-sm"
                             id={alumno.id}
                             onClick={handlerEdit}
                           >
@@ -206,12 +280,29 @@ const User = () => {
                           </button>
                           <button
                             type="button"
-                            className="btn btn-danger btn-sm"
+                            className="btn btn-danger btn-sm mx-2"
                             data-id={alumno.id}
                             onClick={handlerDelete}
                           >
                             <FontAwesomeIcon icon={solid("trash")} />
                           </button>
+                          {data.acciones &&
+                          data.acciones.mejor_amigo_elegido ? (
+                            <button
+                              title="Remover VOTO"
+                              type="button"
+                              className="btn btn-dark btn-sm"
+                              id={alumno.id}
+                              disabled={votoLoading}
+                              onClick={handlerRemoveVote}
+                            >
+                              <FontAwesomeIcon
+                                icon={solid("circle-exclamation")}
+                              />
+                            </button>
+                          ) : (
+                            ""
+                          )}
                         </div>
                       </td>
                     </tr>
